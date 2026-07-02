@@ -2,6 +2,8 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { analyzeAiResultToDemoData } from "./ai/transforms";
+import type { AnalyzeMaterialAIResult } from "./ai/schemas";
 import {
   defaultSelfAssessments,
   defaultWeekSelfAssessments,
@@ -23,7 +25,9 @@ import type {
   SelfAssessment,
   StudyWeek,
   UnderstandingLevel,
+  WeekConcept,
   WeekFeedbackResult,
+  WeekMaterial,
 } from "./types";
 
 interface DemoState {
@@ -58,6 +62,9 @@ interface DemoState {
   recallRecords: RecallRecord[];
   mapSnapshots: MapSnapshot[];
   feedbackById: Record<string, WeekFeedbackResult>;
+  aiWeekConceptsByWeekId: Record<string, WeekConcept[]>;
+  aiMaterialsByWeekId: Record<string, WeekMaterial[]>;
+  aiKeywordsByWeekId: Record<string, [string, string, string]>;
 
   selectSubject: (subjectId: string) => void;
   selectWeek: (weekId: string | null) => void;
@@ -69,7 +76,15 @@ interface DemoState {
   setVerificationAnswer: (questionId: string, text: string) => void;
   resetCurrentRecall: () => void;
   submitWeekRecall: (weekId: string) => void;
+  setCurrentWeekFeedback: (feedback: WeekFeedbackResult) => void;
+  applyVerifiedWeekFeedback: (feedback: WeekFeedbackResult) => void;
   saveRecallRecord: () => void;
+  saveMaterialAnalysis: (input: {
+    subjectId: string;
+    fileName: string;
+    mimeType: string;
+    analysis: AnalyzeMaterialAIResult;
+  }) => string;
 }
 
 export const useDemoStore = create<DemoState>()(
@@ -135,6 +150,9 @@ export const useDemoStore = create<DemoState>()(
       recallRecords: mockRecallRecords,
       mapSnapshots: mockKnowledgeSnapshots,
       feedbackById: mockWeekFeedbackById,
+      aiWeekConceptsByWeekId: {},
+      aiMaterialsByWeekId: {},
+      aiKeywordsByWeekId: {},
 
       selectSubject: (subjectId) =>
         set({ selectedSubjectId: subjectId, selectedWeekId: null }),
@@ -183,6 +201,10 @@ export const useDemoStore = create<DemoState>()(
         const feedback = generateMockWeekFeedback(weekId, answer, recordId);
         set({ currentWeekFeedback: feedback });
       },
+
+      setCurrentWeekFeedback: (feedback) => set({ currentWeekFeedback: feedback }),
+
+      applyVerifiedWeekFeedback: (feedback) => set({ currentWeekFeedback: feedback }),
 
       saveRecallRecord: () => {
         const state = get();
@@ -234,6 +256,47 @@ export const useDemoStore = create<DemoState>()(
           selectedSnapshotIndex: updatedSnapshots.length - 1,
           feedbackById: { ...state.feedbackById, [feedback.id]: feedback },
         });
+      },
+
+      saveMaterialAnalysis: ({ subjectId, fileName, mimeType, analysis }) => {
+        const state = get();
+        const converted = analyzeAiResultToDemoData({ ai: analysis, subjectId, fileName, mimeType });
+        const existingWeek = state.weeks.find((week) => week.id === converted.week.id);
+        const existingMaterials = state.aiMaterialsByWeekId[converted.week.id] ?? [];
+        const staticMaterialIds = existingWeek?.materialIds ?? [];
+        const materialIds = Array.from(
+          new Set([...staticMaterialIds, ...existingMaterials.map((m) => m.id), converted.material.id])
+        );
+
+        const weeks = existingWeek
+          ? state.weeks.map((week) =>
+              week.id === converted.week.id
+                ? { ...week, title: converted.week.title, materialIds }
+                : week
+            )
+          : [...state.weeks, { ...converted.week, materialIds }];
+
+        set({
+          weeks,
+          aiWeekConceptsByWeekId: {
+            ...state.aiWeekConceptsByWeekId,
+            [converted.week.id]: converted.concepts,
+          },
+          aiMaterialsByWeekId: {
+            ...state.aiMaterialsByWeekId,
+            [converted.week.id]: [...existingMaterials, converted.material],
+          },
+          aiKeywordsByWeekId: {
+            ...state.aiKeywordsByWeekId,
+            [converted.week.id]: converted.keywords,
+          },
+          mapSnapshots: [...state.mapSnapshots, converted.snapshot],
+          selectedSnapshotIndex: state.mapSnapshots.length,
+          selectedSubjectId: subjectId,
+          selectedWeekId: converted.week.id,
+        });
+
+        return converted.week.id;
       },
     }),
     { name: "lexirecall-demo-store-v2" }

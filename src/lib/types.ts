@@ -114,6 +114,7 @@ export interface WeekConcept {
   title: string;
   type: ConceptType;
   description?: string;
+  sourceExcerpt?: string;
   outlineLabel?: string;
   keyword?: string;
 }
@@ -160,6 +161,8 @@ export interface VerificationQuestion {
   id: string;
   type: "reason" | "boundary" | "comparison" | "application" | "premise";
   question: string;
+  hiddenRubric?: string;
+  targetConceptTitles?: string[];
 }
 
 export interface WeekFeedbackResult {

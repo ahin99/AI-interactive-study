@@ -10,8 +10,9 @@ export function WeekDetailPanel({ week }: { week: StudyWeek }) {
   const router = useRouter();
   const recallRecords = useDemoStore((s) => s.recallRecords);
   const feedbackById = useDemoStore((s) => s.feedbackById);
+  const aiMaterialsByWeekId = useDemoStore((s) => s.aiMaterialsByWeekId);
   const weekRecords = recallRecords.filter((r) => r.weekId === week.id);
-  const materials = getWeekMaterials(week.id);
+  const materials = [...getWeekMaterials(week.id), ...(aiMaterialsByWeekId[week.id] ?? [])];
 
   return (
     <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">

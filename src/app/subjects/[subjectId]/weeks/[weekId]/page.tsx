@@ -17,14 +17,16 @@ export default function WeekDetailPage({
   const { subjectId, weekId } = use(params);
   const router = useRouter();
   const subject = getSubjectById(subjectId);
-  const week = getWeekById(weekId);
-  const concepts = getWeekConcepts(weekId);
 
   const selectedMapMode = useDemoStore((s) => s.selectedMapMode);
   const selectWeek = useDemoStore((s) => s.selectWeek);
   const mapSnapshots = useDemoStore((s) => s.mapSnapshots);
   const recallRecords = useDemoStore((s) => s.recallRecords);
   const feedbackById = useDemoStore((s) => s.feedbackById);
+  const storeWeeks = useDemoStore((s) => s.weeks);
+  const aiConceptsByWeekId = useDemoStore((s) => s.aiWeekConceptsByWeekId);
+  const week = storeWeeks.find((w) => w.id === weekId) ?? getWeekById(weekId);
+  const concepts = [...getWeekConcepts(weekId), ...(aiConceptsByWeekId[weekId] ?? [])];
 
   useEffect(() => {
     selectWeek(weekId);

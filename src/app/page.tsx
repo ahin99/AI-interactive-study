@@ -7,19 +7,19 @@ import { SubjectCard } from "@/components/subject-card";
 
 export default function Home() {
   return (
-    <div className="space-y-8">
-      <section className="min-h-[32vh] rounded-2xl border border-slate-200 bg-white px-6 py-8 shadow-sm sm:px-8 sm:py-10">
-        <div className="flex h-full flex-col justify-center gap-5">
+    <div className="space-y-7">
+      <section className="rounded-2xl border border-slate-200 bg-white px-6 py-6 shadow-sm sm:px-8">
+        <div className="flex flex-col justify-center gap-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white">
-              <BookOpenCheck className="h-7 w-7" />
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white">
+              <BookOpenCheck className="h-6 w-6" />
             </span>
             <div>
               <p className="text-sm font-medium text-teal-700">자기주도 법학 백지복습 AI</p>
-              <h1 className="text-3xl font-bold text-slate-950 sm:text-5xl">Lexirecall</h1>
+              <h1 className="text-3xl font-bold text-slate-950 sm:text-4xl">Lexirecall</h1>
             </div>
           </div>
-          <p className="max-w-3xl text-base leading-7 text-slate-600 sm:text-lg">
+          <p className="max-w-4xl text-base leading-7 text-slate-600">
             AI가 정답을 바로 알려주기보다, 학생이 안다고 착각한 개념과 실제 설명 가능한 개념의 차이를 드러냅니다.
             과목별 개념 지도를 보며 백지복습 기록을 누적하고 다음 복습 단서를 확인하세요.
           </p>
@@ -42,14 +42,10 @@ export default function Home() {
               과목 추가
             </Link>
           </div>
-          <div className="-mx-4 overflow-x-auto px-4 pb-3">
-            <div className="flex gap-4">
-              {mockSubjects.map((s) => (
-                <div key={s.id} className="w-[280px] shrink-0 sm:w-[320px]">
-                  <SubjectCard subject={s} />
-                </div>
-              ))}
-            </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {mockSubjects.map((s) => (
+              <SubjectCard key={s.id} subject={s} />
+            ))}
           </div>
         </section>
       )}

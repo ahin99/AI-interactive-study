@@ -8,6 +8,8 @@ import { getWeekById, getWeekConcepts, getWeekMaterials, mockWeekSampleAnswer } 
 import { RecallFlowSteps } from "@/components/recall-flow-steps";
 import { RecallDifficultySelector } from "@/components/recall-difficulty-selector";
 import { WeekSelfAssessment } from "@/components/week-self-assessment";
+import type { AiApiResponse } from "@/lib/ai/schemas";
+import type { WeekFeedbackResult } from "@/lib/types";
 
 export default function WeekRecallPage({
   params,
@@ -17,14 +19,24 @@ export default function WeekRecallPage({
   const { subjectId, weekId } = use(params);
   const router = useRouter();
   const [step, setStep] = useState<"check" | "recall">("check");
-  const week = getWeekById(weekId);
-  const concepts = getWeekConcepts(weekId);
-  const materials = getWeekMaterials(weekId);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const storeWeeks = useDemoStore((s) => s.weeks);
+  const aiConceptsByWeekId = useDemoStore((s) => s.aiWeekConceptsByWeekId);
+  const aiMaterialsByWeekId = useDemoStore((s) => s.aiMaterialsByWeekId);
+  const week = storeWeeks.find((w) => w.id === weekId) ?? getWeekById(weekId);
+  const concepts = [...getWeekConcepts(weekId), ...(aiConceptsByWeekId[weekId] ?? [])];
+  const materials = [...getWeekMaterials(weekId), ...(aiMaterialsByWeekId[weekId] ?? [])];
 
   const selectWeek = useDemoStore((s) => s.selectWeek);
   const weekRecallAnswer = useDemoStore((s) => s.weekRecallAnswer);
   const setWeekRecallAnswer = useDemoStore((s) => s.setWeekRecallAnswer);
   const submitWeekRecall = useDemoStore((s) => s.submitWeekRecall);
+  const setCurrentWeekFeedback = useDemoStore((s) => s.setCurrentWeekFeedback);
+  const weekSelfAssessments = useDemoStore((s) => s.weekSelfAssessments);
+  const recallDifficulty = useDemoStore((s) => s.recallDifficulty);
+  const recallRecords = useDemoStore((s) => s.recallRecords);
+  const feedbackById = useDemoStore((s) => s.feedbackById);
 
   useEffect(() => {
     selectWeek(weekId);
@@ -52,9 +64,47 @@ export default function WeekRecallPage({
     );
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!weekRecallAnswer.trim()) return;
-    submitWeekRecall(weekId);
+    setIsSubmitting(true);
+    setErrorMessage("");
+    try {
+      const previousRecords = recallRecords
+        .filter((record) => record.weekId === weekId)
+        .slice(-3)
+        .map((record) => ({
+          submittedAt: record.submittedAt,
+          nextReviewHint: feedbackById[record.feedbackId]?.nextReviewHint ?? "",
+        }));
+
+      const response = await fetch("/api/ai/grade-recall", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subjectId,
+          weekId,
+          subjectName: subjectId,
+          weekTitle: week?.title,
+          concepts,
+          selfAssessments: weekSelfAssessments[weekId] ?? [],
+          difficulty: recallDifficulty,
+          answerText: weekRecallAnswer,
+          previousRecords,
+        }),
+      });
+      const payload = (await response.json()) as AiApiResponse<WeekFeedbackResult>;
+      if (!payload.ok) throw new Error(payload.message);
+      setCurrentWeekFeedback(payload.data);
+    } catch (error) {
+      submitWeekRecall(weekId);
+      setErrorMessage(
+        error instanceof Error
+          ? `AI 피드백 호출에 실패해 mock 피드백을 사용했습니다. (${error.message})`
+          : "AI 피드백 호출에 실패해 mock 피드백을 사용했습니다."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
     router.push(`/subjects/${subjectId}/weeks/${weekId}/feedback`);
   }
 
@@ -117,13 +167,14 @@ export default function WeekRecallPage({
             </button>
             <button
               type="button"
-              disabled={!weekRecallAnswer.trim()}
+              disabled={!weekRecallAnswer.trim() || isSubmitting}
               onClick={handleSubmit}
               className="rounded-lg bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
             >
-              제출하고 피드백 보기
+              {isSubmitting ? "AI 피드백 생성 중..." : "제출하고 피드백 보기"}
             </button>
           </div>
+          {errorMessage && <p className="text-xs text-orange-600">{errorMessage}</p>}
         </div>
       )}
     </div>

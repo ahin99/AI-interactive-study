@@ -26,7 +26,7 @@ export function WeekMosaicMap({
     <div className="flex justify-center">
       <div
         className="grid aspect-square w-full grid-cols-4 overflow-hidden border border-slate-300 bg-white shadow-sm"
-        style={{ maxWidth: "min(78vh, 860px)" }}
+        style={{ maxWidth: "min(55vh, 600px)" }}
       >
       {slots.map((week, index) => {
         if (!week) {

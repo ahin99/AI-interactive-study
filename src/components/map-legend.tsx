@@ -16,10 +16,10 @@ const knowledgeOrder: KnowledgeStatus[] = [
 export function MapLegend({ mode }: { mode: MapMode }) {
   if (mode === "knowledge") {
     return (
-      <div className="flex flex-wrap gap-3 text-xs text-slate-600">
+      <div className="flex flex-wrap gap-4 text-sm text-slate-600">
         {knowledgeOrder.map((status) => (
-          <span key={status} className="flex items-center gap-1.5">
-            <span className={`h-2.5 w-2.5 rounded-full ${knowledgeStatusLegendClasses[status]}`} />
+          <span key={status} className="flex items-center gap-2">
+            <span className={`h-3.5 w-3.5 rounded-full ${knowledgeStatusLegendClasses[status]}`} />
             {knowledgeStatusLabel[status]}
           </span>
         ))}
@@ -28,10 +28,10 @@ export function MapLegend({ mode }: { mode: MapMode }) {
   }
 
   return (
-    <div className="flex flex-wrap gap-3 text-xs text-slate-600">
+    <div className="flex flex-wrap gap-4 text-sm text-slate-600">
       {metacognitionLegend.map((item) => (
-        <span key={item.label} className="flex items-center gap-1.5">
-          <span className={`h-2.5 w-2.5 rounded-full ${item.className}`} />
+        <span key={item.label} className="flex items-center gap-2">
+          <span className={`h-3.5 w-3.5 rounded-full ${item.className}`} />
           {item.label}
         </span>
       ))}

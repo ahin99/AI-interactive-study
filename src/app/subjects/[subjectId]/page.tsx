@@ -28,7 +28,7 @@ export default function SubjectDetailPage({
     <div className="space-y-5">
       <div>
         <h1 className="text-4xl font-bold tracking-normal text-slate-950 sm:text-6xl">{subject.name}</h1>
-        <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 border-y border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
+        <div className="mt-4 flex flex-wrap gap-x-7 gap-y-2 border-y border-slate-200 bg-white px-5 py-4 text-base text-slate-600">
           <span>
             지도 완성률 <strong className="ml-1 text-slate-950">{subject.completionRate}%</strong>
           </span>

@@ -18,6 +18,7 @@ export function SubjectMapView({ subject }: { subject: Subject }) {
   const selectedSnapshotIndex = useDemoStore((s) => s.selectedSnapshotIndex);
   const setSnapshotIndex = useDemoStore((s) => s.setSnapshotIndex);
   const allWeeks = useDemoStore((s) => s.weeks);
+  const aiConceptsByWeekId = useDemoStore((s) => s.aiWeekConceptsByWeekId);
   const weeks = useMemo(
     () => allWeeks.filter((w) => w.subjectId === subject.id),
     [allWeeks, subject.id]
@@ -32,9 +33,11 @@ export function SubjectMapView({ subject }: { subject: Subject }) {
 
   const conceptsByWeek = useMemo(() => {
     const map: Record<string, WeekConcept[]> = {};
-    for (const week of weeks) map[week.id] = getWeekConcepts(week.id);
+    for (const week of weeks) {
+      map[week.id] = [...getWeekConcepts(week.id), ...(aiConceptsByWeekId[week.id] ?? [])];
+    }
     return map;
-  }, [weeks]);
+  }, [aiConceptsByWeekId, weeks]);
 
   if (weeks.length === 0) {
     return (
@@ -62,13 +65,13 @@ export function SubjectMapView({ subject }: { subject: Subject }) {
         onSelectWeek={openWeek}
       />
 
-      <div className="space-y-4 border-t border-slate-200 pt-5">
+      <div className="space-y-5 border-t border-slate-200 pt-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => setMapMode("knowledge")}
-              className={`rounded-full border px-4 py-1.5 text-sm ${
+              className={`rounded-full border px-5 py-2 text-base font-medium ${
                 selectedMapMode === "knowledge"
                   ? "border-slate-900 bg-slate-900 text-white"
                   : "border-slate-300 bg-white text-slate-600 hover:border-slate-400"
@@ -79,7 +82,7 @@ export function SubjectMapView({ subject }: { subject: Subject }) {
             <button
               type="button"
               onClick={() => setMapMode("metacognition")}
-              className={`rounded-full border px-4 py-1.5 text-sm ${
+              className={`rounded-full border px-5 py-2 text-base font-medium ${
                 selectedMapMode === "metacognition"
                   ? "border-slate-900 bg-slate-900 text-white"
                   : "border-slate-300 bg-white text-slate-600 hover:border-slate-400"

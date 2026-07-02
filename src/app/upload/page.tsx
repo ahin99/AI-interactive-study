@@ -3,7 +3,9 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, FileUp, Loader2, X } from "lucide-react";
+import { useDemoStore } from "@/lib/demo-store";
 import { getWeekById, mockWeekMaterials } from "@/lib/mock-data";
+import type { AiApiResponse, AnalyzeMaterialAIResult } from "@/lib/ai/schemas";
 
 type Status = "idle" | "analyzing" | "analyzed";
 
@@ -11,6 +13,20 @@ interface DraftFile {
   id: string;
   fileName: string;
   displayName: string;
+  file?: File;
+  mimeType?: string;
+}
+
+function readFileAsBase64(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result ?? "");
+      resolve(result.includes(",") ? result.split(",")[1] : result);
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
 }
 
 function UploadForm() {
@@ -24,6 +40,9 @@ function UploadForm() {
   const [weekNumber, setWeekNumber] = useState(presetWeek ? String(presetWeek.weekNumber) : "6");
   const [files, setFiles] = useState<DraftFile[]>([]);
   const [status, setStatus] = useState<Status>("idle");
+  const [message, setMessage] = useState("");
+  const [analyzedWeekId, setAnalyzedWeekId] = useState<string | null>(null);
+  const saveMaterialAnalysis = useDemoStore((s) => s.saveMaterialAnalysis);
 
   function addFiles(fileList: FileList | null) {
     if (!fileList || fileList.length === 0) return;
@@ -31,6 +50,8 @@ function UploadForm() {
       id: `${f.name}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       fileName: f.name,
       displayName: f.name.replace(/\.[^.]+$/, ""),
+      file: f,
+      mimeType: f.type || "application/octet-stream",
     }));
     setFiles((prev) => [...prev, ...added]);
     setStatus("idle");
@@ -39,7 +60,12 @@ function UploadForm() {
   function applySample(material: (typeof mockWeekMaterials)[number]) {
     setFiles((prev) => [
       ...prev,
-      { id: `${material.id}-${Date.now()}`, fileName: material.fileName, displayName: material.displayName },
+      {
+        id: `${material.id}-${Date.now()}`,
+        fileName: material.fileName,
+        displayName: material.displayName,
+        mimeType: "text/plain",
+      },
     ]);
     setStatus("idle");
   }
@@ -52,10 +78,61 @@ function UploadForm() {
     setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, displayName: name } : f)));
   }
 
-  function startAnalysis() {
+  async function startAnalysis() {
     if (files.length === 0) return;
     setStatus("analyzing");
-    setTimeout(() => setStatus("analyzed"), 1400);
+    setMessage("");
+    const week = Number(weekNumber);
+    if (!Number.isInteger(week) || week < 1 || week > 16) {
+      setStatus("idle");
+      setMessage("주차는 1부터 16 사이의 숫자로 입력하세요.");
+      return;
+    }
+
+    try {
+      const primary = files[0];
+      let fileBase64: string | undefined;
+      let plainText: string | undefined;
+      const mimeType = primary.mimeType ?? "text/plain";
+
+      if (primary.file && mimeType === "application/pdf") {
+        fileBase64 = await readFileAsBase64(primary.file);
+      } else if (primary.file && mimeType.startsWith("text/")) {
+        plainText = await primary.file.text();
+      } else {
+        plainText = files
+          .map((file) => `파일명: ${file.fileName}\n표시명: ${file.displayName}`)
+          .join("\n\n");
+      }
+
+      const response = await fetch("/api/ai/analyze-material", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subjectId,
+          subjectName: course,
+          weekNumber: week,
+          fileName: primary.fileName,
+          mimeType,
+          fileBase64,
+          plainText,
+        }),
+      });
+      const payload = (await response.json()) as AiApiResponse<AnalyzeMaterialAIResult>;
+      if (!payload.ok) throw new Error(payload.message);
+      const weekId = saveMaterialAnalysis({
+        subjectId,
+        fileName: primary.fileName,
+        mimeType,
+        analysis: payload.data,
+      });
+      setAnalyzedWeekId(weekId);
+      setStatus("analyzed");
+      setMessage(payload.fallback ? payload.message ?? "임시 개념 구조로 저장했습니다." : "");
+    } catch (error) {
+      setStatus("idle");
+      setMessage(error instanceof Error ? error.message : "자료 분석에 실패했습니다.");
+    }
   }
 
   return (
@@ -170,11 +247,12 @@ function UploadForm() {
           </span>
         )}
       </div>
+      {message && <p className="text-sm text-orange-600">{message}</p>}
 
       {status === "analyzed" && (
         <button
           type="button"
-          onClick={() => router.push(`/subjects/${subjectId}`)}
+          onClick={() => router.push(analyzedWeekId ? `/subjects/${subjectId}/weeks/${analyzedWeekId}` : `/subjects/${subjectId}`)}
           className="rounded-full border border-teal-600 px-5 py-2.5 text-sm font-medium text-teal-700 hover:bg-teal-50"
         >
           과목 상세에서 지식 지도 보기 →

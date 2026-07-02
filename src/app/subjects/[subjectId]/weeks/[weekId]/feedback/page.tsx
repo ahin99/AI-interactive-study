@@ -1,11 +1,13 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MapPinned } from "lucide-react";
 import { useDemoStore } from "@/lib/demo-store";
-import { getWeekById } from "@/lib/mock-data";
+import { getWeekById, getWeekConcepts } from "@/lib/mock-data";
+import { applyVerifyAiResult } from "@/lib/ai/transforms";
+import type { AiApiResponse, VerifySocraticAIResult } from "@/lib/ai/schemas";
 import { AnnotatedAnswer } from "@/components/annotated-answer";
 import { RecallFlowSteps } from "@/components/recall-flow-steps";
 import { VerificationQuestionList } from "@/components/verification-question-list";
@@ -17,12 +19,18 @@ export default function WeekFeedbackPage({
 }) {
   const { subjectId, weekId } = use(params);
   const router = useRouter();
-  const week = getWeekById(weekId);
+  const storeWeeks = useDemoStore((s) => s.weeks);
+  const aiConceptsByWeekId = useDemoStore((s) => s.aiWeekConceptsByWeekId);
+  const week = storeWeeks.find((w) => w.id === weekId) ?? getWeekById(weekId);
+  const concepts = [...getWeekConcepts(weekId), ...(aiConceptsByWeekId[weekId] ?? [])];
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
 
   const currentWeekFeedback = useDemoStore((s) => s.currentWeekFeedback);
   const verificationAnswers = useDemoStore((s) => s.verificationAnswers);
   const saveRecallRecord = useDemoStore((s) => s.saveRecallRecord);
   const resetCurrentRecall = useDemoStore((s) => s.resetCurrentRecall);
+  const applyVerifiedWeekFeedback = useDemoStore((s) => s.applyVerifiedWeekFeedback);
 
   if (!week || !currentWeekFeedback || currentWeekFeedback.weekId !== weekId) {
     return (
@@ -42,9 +50,44 @@ export default function WeekFeedbackPage({
     (q) => (verificationAnswers[q.id] ?? "").trim().length > 0
   );
 
-  function handleSave() {
+  async function handleSave() {
+    if (!currentWeekFeedback) return;
+    setIsSaving(true);
+    setSaveMessage("");
+    let feedbackToSave = currentWeekFeedback;
+    try {
+      const statusByConceptTitle = Object.fromEntries(
+        concepts
+          .filter((concept) => currentWeekFeedback.statusByConceptId[concept.id])
+          .map((concept) => [concept.title, currentWeekFeedback.statusByConceptId[concept.id]])
+      );
+      const response = await fetch("/api/ai/verify-socratic", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subjectId,
+          weekId,
+          subjectName: subjectId,
+          weekTitle: week?.title,
+          questionsWithHiddenRubric: currentWeekFeedback.verificationQuestions,
+          verificationAnswers,
+          statusByConceptTitle,
+        }),
+      });
+      const payload = (await response.json()) as AiApiResponse<VerifySocraticAIResult>;
+      if (!payload.ok) throw new Error(payload.message);
+      feedbackToSave = applyVerifyAiResult({ feedback: currentWeekFeedback, concepts, ai: payload.data });
+      applyVerifiedWeekFeedback(feedbackToSave);
+    } catch (error) {
+      setSaveMessage(
+        error instanceof Error
+          ? `질문 검증에 실패해 기존 피드백을 저장합니다. (${error.message})`
+          : "질문 검증에 실패해 기존 피드백을 저장합니다."
+      );
+    }
     saveRecallRecord();
     resetCurrentRecall();
+    setIsSaving(false);
     router.push(`/subjects/${subjectId}/weeks/${weekId}`);
   }
 
@@ -95,15 +138,16 @@ export default function WeekFeedbackPage({
 
           <button
             type="button"
-            disabled={!allAnswered}
+            disabled={!allAnswered || isSaving}
             onClick={handleSave}
             className="w-full rounded-lg bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
-            결과 저장
+            {isSaving ? "검증 후 저장 중..." : "결과 저장"}
           </button>
           {!allAnswered && (
             <p className="text-xs text-slate-400">질문 3개에 모두 답변하면 저장할 수 있습니다.</p>
           )}
+          {saveMessage && <p className="text-xs text-orange-600">{saveMessage}</p>}
         </aside>
       </div>
     </div>
