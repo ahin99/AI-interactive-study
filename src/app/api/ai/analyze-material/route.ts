@@ -95,8 +95,8 @@ export async function POST(request: Request) {
   const geminiInput =
     body.fileBase64 && body.mimeType === "application/pdf"
       ? [
-          { type: "text", text: prompt },
-          { type: "document", data: body.fileBase64, mime_type: "application/pdf" },
+          { text: prompt },
+          { inlineData: { data: body.fileBase64, mimeType: "application/pdf" } },
         ]
       : prompt;
 

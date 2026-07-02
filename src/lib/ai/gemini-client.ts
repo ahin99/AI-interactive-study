@@ -1,10 +1,11 @@
 import { GoogleGenAI } from "@google/genai";
+import type { ContentListUnion } from "@google/genai";
 import type { z } from "zod";
 import type { AiApiErrorCode } from "./schemas";
 
 export const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-3.5-flash";
 
-type GeminiPrompt = string | object | object[];
+type GeminiPrompt = ContentListUnion;
 
 export class AiCallError extends Error {
   errorCode: AiApiErrorCode;
@@ -53,17 +54,18 @@ export async function requestGeminiJson<T>(input: {
           : input.prompt;
 
     try {
-      const interaction = await client.interactions.create({
+      const response = await client.models.generateContent({
         model: GEMINI_MODEL,
-        input: prompt as never,
-        response_format: {
-          type: "text",
-          mime_type: "application/json",
-          schema: input.jsonSchema,
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseJsonSchema: input.jsonSchema,
+          thinkingConfig: { thinkingBudget: 0 },
+          httpOptions: { timeout: 20000 },
         },
       });
 
-      const raw = interaction.output_text;
+      const raw = response.text;
       if (!raw) throw new AiCallError("INVALID_JSON", "Gemini returned an empty response.");
       return input.zodSchema.parse(JSON.parse(raw));
     } catch (error) {
