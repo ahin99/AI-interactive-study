@@ -17,9 +17,12 @@ export function WeekExpandedMap({
   snapshot: MapSnapshot | undefined;
   mode: MapMode;
 }) {
+  const visibleConcepts = concepts.slice(0, 16);
+  const emptyCount = Math.max(0, 16 - visibleConcepts.length);
+
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-      {concepts.map((concept) => {
+    <div className="grid aspect-square grid-cols-4 overflow-hidden border border-slate-300 bg-white shadow-sm">
+      {visibleConcepts.map((concept) => {
         const tile = getConceptTile(snapshot, concept.id);
         const className =
           mode === "knowledge"
@@ -35,12 +38,15 @@ export function WeekExpandedMap({
           <div
             key={concept.id}
             title={hint}
-            className={`flex min-h-[72px] flex-col justify-between rounded-lg p-3 text-sm font-medium text-slate-900 transition-transform ${className}`}
+            className={`flex aspect-square flex-col justify-between border border-white/60 p-2 text-xs font-medium text-slate-900 sm:p-3 sm:text-sm ${className}`}
           >
             <span className="leading-snug">{concept.title}</span>
           </div>
         );
       })}
+      {Array.from({ length: emptyCount }).map((_, index) => (
+        <div key={`empty-${index}`} className="aspect-square border border-slate-100 bg-white" />
+      ))}
     </div>
   );
 }

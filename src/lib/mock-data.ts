@@ -214,6 +214,56 @@ export const mockSubjects: Subject[] = [
     materialCount: 3,
     recent: true,
   },
+  {
+    id: "constitutional-law",
+    name: "헌법",
+    completionRate: 38,
+    metacognitionGapRate: 57,
+    lastReviewedAt: "2일 전",
+    lastReviewHint: "기본권 제한의 단계 구조를 다시 백지복습 하세요.",
+    materialCount: 4,
+    recent: true,
+  },
+  {
+    id: "criminal-law-general",
+    name: "형법총론",
+    completionRate: 44,
+    metacognitionGapRate: 68,
+    lastReviewedAt: "3일 전",
+    lastReviewHint: "구성요건 해당성과 위법성 조각사유를 분리해 설명하세요.",
+    materialCount: 3,
+    recent: false,
+  },
+  {
+    id: "obligation-special",
+    name: "채권법각론",
+    completionRate: 29,
+    metacognitionGapRate: 61,
+    lastReviewedAt: "5일 전",
+    lastReviewHint: "매매의 담보책임과 채무불이행 책임을 비교하세요.",
+    materialCount: 3,
+    recent: false,
+  },
+  {
+    id: "property-law",
+    name: "물권법",
+    completionRate: 35,
+    metacognitionGapRate: 49,
+    lastReviewedAt: "6일 전",
+    lastReviewHint: "물권변동의 공시 원칙을 사례로 다시 설명하세요.",
+    materialCount: 3,
+    recent: false,
+  },
+  {
+    id: "corporate-law",
+    name: "회사법",
+    completionRate: 41,
+    metacognitionGapRate: 54,
+    lastReviewedAt: "1일 전",
+    lastReviewHint: "주주총회 결의 하자의 유형을 구별하세요.",
+    materialCount: 4,
+    recent: true,
+  },
 ];
 
 export const mockWeeks: StudyWeek[] = [
@@ -231,6 +281,102 @@ export const mockWeeks: StudyWeek[] = [
     weekNumber: 5,
     title: "5주차 · 무효와 취소",
     materialIds: ["mat-week5-1"],
+    reviewCount: 0,
+  },
+  {
+    id: "const-week-1",
+    subjectId: "constitutional-law",
+    weekNumber: 1,
+    title: "1주차 · 헌법의 기본원리",
+    materialIds: ["mat-const-1"],
+    reviewCount: 1,
+  },
+  {
+    id: "const-week-2",
+    subjectId: "constitutional-law",
+    weekNumber: 2,
+    title: "2주차 · 기본권 제한",
+    materialIds: ["mat-const-2"],
+    reviewCount: 1,
+  },
+  {
+    id: "const-week-3",
+    subjectId: "constitutional-law",
+    weekNumber: 3,
+    title: "3주차 · 평등권",
+    materialIds: ["mat-const-3"],
+    reviewCount: 0,
+  },
+  {
+    id: "criminal-week-1",
+    subjectId: "criminal-law-general",
+    weekNumber: 1,
+    title: "1주차 · 범죄체계론",
+    materialIds: ["mat-criminal-1"],
+    reviewCount: 1,
+  },
+  {
+    id: "criminal-week-2",
+    subjectId: "criminal-law-general",
+    weekNumber: 2,
+    title: "2주차 · 위법성 조각사유",
+    materialIds: ["mat-criminal-2"],
+    reviewCount: 0,
+  },
+  {
+    id: "obligation-week-1",
+    subjectId: "obligation-special",
+    weekNumber: 1,
+    title: "1주차 · 매매",
+    materialIds: ["mat-obligation-1"],
+    reviewCount: 1,
+  },
+  {
+    id: "obligation-week-2",
+    subjectId: "obligation-special",
+    weekNumber: 2,
+    title: "2주차 · 임대차",
+    materialIds: ["mat-obligation-2"],
+    reviewCount: 0,
+  },
+  {
+    id: "property-week-1",
+    subjectId: "property-law",
+    weekNumber: 1,
+    title: "1주차 · 물권변동",
+    materialIds: ["mat-property-1"],
+    reviewCount: 1,
+  },
+  {
+    id: "property-week-2",
+    subjectId: "property-law",
+    weekNumber: 2,
+    title: "2주차 · 점유권",
+    materialIds: ["mat-property-2"],
+    reviewCount: 0,
+  },
+  {
+    id: "corporate-week-1",
+    subjectId: "corporate-law",
+    weekNumber: 1,
+    title: "1주차 · 회사의 종류",
+    materialIds: ["mat-corporate-1"],
+    reviewCount: 1,
+  },
+  {
+    id: "corporate-week-2",
+    subjectId: "corporate-law",
+    weekNumber: 2,
+    title: "2주차 · 주주총회",
+    materialIds: ["mat-corporate-2"],
+    reviewCount: 1,
+  },
+  {
+    id: "corporate-week-3",
+    subjectId: "corporate-law",
+    weekNumber: 3,
+    title: "3주차 · 이사회",
+    materialIds: ["mat-corporate-3"],
     reviewCount: 0,
   },
 ];
@@ -263,6 +409,18 @@ export const mockWeekMaterials: WeekMaterial[] = [
     uploadedAt: "2026-06-30",
     status: "analyzed",
   },
+  { id: "mat-const-1", subjectId: "constitutional-law", weekId: "const-week-1", displayName: "헌법 1주차 강의자료", fileName: "헌법_1주차.pdf", uploadedAt: "2026-06-18", status: "analyzed" },
+  { id: "mat-const-2", subjectId: "constitutional-law", weekId: "const-week-2", displayName: "기본권 제한 판례", fileName: "기본권제한_판례.pdf", uploadedAt: "2026-06-19", status: "analyzed" },
+  { id: "mat-const-3", subjectId: "constitutional-law", weekId: "const-week-3", displayName: "평등권 사례 정리", fileName: "평등권_사례.pdf", uploadedAt: "2026-06-22", status: "analyzed" },
+  { id: "mat-criminal-1", subjectId: "criminal-law-general", weekId: "criminal-week-1", displayName: "형법총론 범죄체계론", fileName: "형법총론_1주차.pdf", uploadedAt: "2026-06-17", status: "analyzed" },
+  { id: "mat-criminal-2", subjectId: "criminal-law-general", weekId: "criminal-week-2", displayName: "위법성 조각사유", fileName: "위법성조각사유.pdf", uploadedAt: "2026-06-24", status: "analyzed" },
+  { id: "mat-obligation-1", subjectId: "obligation-special", weekId: "obligation-week-1", displayName: "채권각론 매매", fileName: "채권각론_매매.pdf", uploadedAt: "2026-06-16", status: "analyzed" },
+  { id: "mat-obligation-2", subjectId: "obligation-special", weekId: "obligation-week-2", displayName: "임대차 쟁점", fileName: "임대차_쟁점.pdf", uploadedAt: "2026-06-23", status: "analyzed" },
+  { id: "mat-property-1", subjectId: "property-law", weekId: "property-week-1", displayName: "물권변동 총설", fileName: "물권변동.pdf", uploadedAt: "2026-06-15", status: "analyzed" },
+  { id: "mat-property-2", subjectId: "property-law", weekId: "property-week-2", displayName: "점유권 사례", fileName: "점유권_사례.pdf", uploadedAt: "2026-06-23", status: "analyzed" },
+  { id: "mat-corporate-1", subjectId: "corporate-law", weekId: "corporate-week-1", displayName: "회사법 총론", fileName: "회사법_1주차.pdf", uploadedAt: "2026-06-14", status: "analyzed" },
+  { id: "mat-corporate-2", subjectId: "corporate-law", weekId: "corporate-week-2", displayName: "주주총회 결의", fileName: "주주총회.pdf", uploadedAt: "2026-06-21", status: "analyzed" },
+  { id: "mat-corporate-3", subjectId: "corporate-law", weekId: "corporate-week-3", displayName: "이사회 운영", fileName: "이사회.pdf", uploadedAt: "2026-06-28", status: "analyzed" },
 ];
 
 export const mockWeekConcepts: WeekConcept[] = [
@@ -281,7 +439,30 @@ export const mockWeekConcepts: WeekConcept[] = [
   { id: "ratification", weekId: "week-5", title: "추인", type: "requirement" },
   { id: "legal-act-effect", weekId: "week-5", title: "법률행위 효력", type: "effect" },
   { id: "limitation-period", weekId: "week-5", title: "제척기간", type: "exception" },
+  ...makeWeekConcepts("const-week-1", ["헌법의 최고규범성", "국민주권", "법치국가원리", "사회국가원리", "권력분립"]),
+  ...makeWeekConcepts("const-week-2", ["기본권 주체", "기본권 제한", "과잉금지원칙", "본질내용 침해금지", "이중기준론"]),
+  ...makeWeekConcepts("const-week-3", ["평등권", "자의금지원칙", "비례심사", "적극적 평등실현조치", "차별취급"]),
+  ...makeWeekConcepts("criminal-week-1", ["구성요건", "위법성", "책임", "고의", "과실"]),
+  ...makeWeekConcepts("criminal-week-2", ["정당방위", "긴급피난", "자구행위", "피해자 승낙", "정당행위"]),
+  ...makeWeekConcepts("obligation-week-1", ["매매계약", "담보책임", "위험부담", "동시이행항변", "해제"]),
+  ...makeWeekConcepts("obligation-week-2", ["임대차", "차임지급", "수선의무", "보증금", "대항력"]),
+  ...makeWeekConcepts("property-week-1", ["물권변동", "등기", "인도", "공신의 원칙", "중간생략등기"]),
+  ...makeWeekConcepts("property-week-2", ["점유", "자주점유", "점유보호청구권", "취득시효", "간접점유"]),
+  ...makeWeekConcepts("corporate-week-1", ["합명회사", "합자회사", "유한책임회사", "주식회사", "법인격"]),
+  ...makeWeekConcepts("corporate-week-2", ["주주총회", "소집절차", "결의요건", "결의취소", "결의무효"]),
+  ...makeWeekConcepts("corporate-week-3", ["이사회", "대표이사", "감사의 권한", "업무집행", "충실의무"]),
 ];
+
+function makeWeekConcepts(weekId: string, titles: string[]): WeekConcept[] {
+  const types: WeekConcept["type"][] = ["main_concept", "requirement", "effect", "case", "comparison"];
+  return titles.map((title, index) => ({
+    id: `${weekId}-concept-${index + 1}`,
+    weekId,
+    title,
+    type: types[index % types.length],
+    description: `${title}의 성립요건과 효과를 구별해 설명하는 시연용 개념`,
+  }));
+}
 
 export function getWeekConcepts(weekId: string): WeekConcept[] {
   return mockWeekConcepts.filter((c) => c.weekId === weekId);
@@ -311,6 +492,12 @@ export function getWeekById(weekId: string): StudyWeek | undefined {
 export const mockWeekKeywords: Record<string, [string, string, string]> = {
   "week-4": ["통정허위표시", "비진의표시", "착오"],
   "week-5": ["무효", "취소", "추인"],
+  "const-week-1": ["국민주권", "법치국가", "권력분립"],
+  "const-week-2": ["기본권 제한", "과잉금지", "본질내용"],
+  "criminal-week-1": ["구성요건", "위법성", "책임"],
+  "obligation-week-1": ["담보책임", "위험부담", "해제"],
+  "property-week-1": ["등기", "인도", "공시"],
+  "corporate-week-2": ["소집절차", "결의요건", "결의하자"],
 };
 
 // 주차 자기평가 초기값
@@ -321,6 +508,12 @@ export const defaultWeekSelfAssessments: Record<string, SelfAssessment[]> = {
     { conceptId: "declaration-of-intent", predictedKnown: true },
   ],
   "week-5": [],
+  "const-week-1": [{ conceptId: "const-week-1-concept-2", predictedKnown: true }],
+  "const-week-2": [{ conceptId: "const-week-2-concept-3", predictedKnown: true }],
+  "criminal-week-1": [{ conceptId: "criminal-week-1-concept-1", predictedKnown: true }],
+  "obligation-week-1": [{ conceptId: "obligation-week-1-concept-2", predictedKnown: true }],
+  "property-week-1": [{ conceptId: "property-week-1-concept-1", predictedKnown: true }],
+  "corporate-week-2": [{ conceptId: "corporate-week-2-concept-4", predictedKnown: true }],
 };
 
 function tile(status: KnowledgeStatus, metacognitionGap: number | null) {
@@ -334,6 +527,30 @@ const week5UnreviewedTiles: MapSnapshot["tilesByConceptId"] = {
   "legal-act-effect": { conceptId: "legal-act-effect", ...tile("unreviewed", null) },
   "limitation-period": { conceptId: "limitation-period", ...tile("unreviewed", null) },
 };
+
+const demoStatusCycle: KnowledgeStatus[] = [
+  "complete",
+  "partial",
+  "misconception",
+  "not_recalled",
+  "partial",
+  "unreviewed",
+];
+
+function buildSubjectTiles(subjectId: string, offset = 0): MapSnapshot["tilesByConceptId"] {
+  const weekIds = mockWeeks.filter((week) => week.subjectId === subjectId).map((week) => week.id);
+  const conceptIds = mockWeekConcepts
+    .filter((concept) => weekIds.includes(concept.weekId))
+    .map((concept) => concept.id);
+
+  return Object.fromEntries(
+    conceptIds.map((conceptId, index) => {
+      const status = demoStatusCycle[(index + offset) % demoStatusCycle.length];
+      const gap = status === "unreviewed" ? null : 25 + ((index + offset) * 13) % 68;
+      return [conceptId, { conceptId, ...tile(status, gap) }];
+    })
+  );
+}
 
 export const mockKnowledgeSnapshots: MapSnapshot[] = [
   {
@@ -392,6 +609,46 @@ export const mockKnowledgeSnapshots: MapSnapshot[] = [
       mistake: { conceptId: "mistake", ...tile("partial", 45) },
       ...week5UnreviewedTiles,
     },
+  },
+  {
+    id: "snapshot-constitutional-law-current",
+    subjectId: "constitutional-law",
+    label: "현재",
+    reviewNumber: 2,
+    createdAt: "2026-06-29",
+    tilesByConceptId: buildSubjectTiles("constitutional-law", 1),
+  },
+  {
+    id: "snapshot-criminal-law-general-current",
+    subjectId: "criminal-law-general",
+    label: "현재",
+    reviewNumber: 1,
+    createdAt: "2026-06-27",
+    tilesByConceptId: buildSubjectTiles("criminal-law-general", 2),
+  },
+  {
+    id: "snapshot-obligation-special-current",
+    subjectId: "obligation-special",
+    label: "현재",
+    reviewNumber: 1,
+    createdAt: "2026-06-26",
+    tilesByConceptId: buildSubjectTiles("obligation-special", 3),
+  },
+  {
+    id: "snapshot-property-law-current",
+    subjectId: "property-law",
+    label: "현재",
+    reviewNumber: 1,
+    createdAt: "2026-06-26",
+    tilesByConceptId: buildSubjectTiles("property-law", 4),
+  },
+  {
+    id: "snapshot-corporate-law-current",
+    subjectId: "corporate-law",
+    label: "현재",
+    reviewNumber: 2,
+    createdAt: "2026-06-30",
+    tilesByConceptId: buildSubjectTiles("corporate-law", 5),
   },
 ];
 

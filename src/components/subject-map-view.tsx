@@ -1,19 +1,18 @@
 "use client";
 
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useDemoStore } from "@/lib/demo-store";
 import { getWeekConcepts } from "@/lib/mock-data";
 import type { Subject, WeekConcept } from "@/lib/types";
 import { MapLegend } from "./map-legend";
 import { MapSnapshotSlider } from "./map-snapshot-slider";
-import { WeekDetailPanel } from "./week-detail-panel";
-import { WeekExpandedMap } from "./week-expanded-map";
 import { WeekMosaicMap } from "./week-mosaic-map";
 
 export function SubjectMapView({ subject }: { subject: Subject }) {
+  const router = useRouter();
   const selectedMapMode = useDemoStore((s) => s.selectedMapMode);
   const setMapMode = useDemoStore((s) => s.setMapMode);
-  const selectedWeekId = useDemoStore((s) => s.selectedWeekId);
   const selectWeek = useDemoStore((s) => s.selectWeek);
   const mapSnapshots = useDemoStore((s) => s.mapSnapshots);
   const selectedSnapshotIndex = useDemoStore((s) => s.selectedSnapshotIndex);
@@ -37,8 +36,6 @@ export function SubjectMapView({ subject }: { subject: Subject }) {
     return map;
   }, [weeks]);
 
-  const selectedWeek = weeks.find((w) => w.id === selectedWeekId) ?? null;
-
   if (weeks.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center">
@@ -50,67 +47,52 @@ export function SubjectMapView({ subject }: { subject: Subject }) {
     );
   }
 
+  function openWeek(weekId: string) {
+    selectWeek(weekId);
+    router.push(`/subjects/${subject.id}/weeks/${weekId}`);
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setMapMode("knowledge")}
-            className={`rounded-full border px-4 py-1.5 text-sm ${
-              selectedMapMode === "knowledge"
-                ? "border-slate-900 bg-slate-900 text-white"
-                : "border-slate-300 text-slate-600 hover:border-slate-400"
-            }`}
-          >
-            지식 지도
-          </button>
-          <button
-            type="button"
-            onClick={() => setMapMode("metacognition")}
-            className={`rounded-full border px-4 py-1.5 text-sm ${
-              selectedMapMode === "metacognition"
-                ? "border-slate-900 bg-slate-900 text-white"
-                : "border-slate-300 text-slate-600 hover:border-slate-400"
-            }`}
-          >
-            메타인지 지도
-          </button>
-        </div>
-        <MapLegend mode={selectedMapMode} />
-      </div>
-
-      <MapSnapshotSlider snapshots={subjectSnapshots} index={clampedIndex} onChange={setSnapshotIndex} />
-
+    <div className="space-y-5">
       <WeekMosaicMap
         weeks={weeks}
         conceptsByWeek={conceptsByWeek}
         snapshot={activeSnapshot}
         mode={selectedMapMode}
-        selectedWeekId={selectedWeekId}
-        onSelectWeek={selectWeek}
+        onSelectWeek={openWeek}
       />
 
-      {selectedWeek && (
-        <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-5">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-slate-700">{selectedWeek.title} 확대</h3>
+      <div className="space-y-4 border-t border-slate-200 pt-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => selectWeek(null)}
-              className="text-xs text-slate-400 hover:text-slate-600"
+              onClick={() => setMapMode("knowledge")}
+              className={`rounded-full border px-4 py-1.5 text-sm ${
+                selectedMapMode === "knowledge"
+                  ? "border-slate-900 bg-slate-900 text-white"
+                  : "border-slate-300 bg-white text-slate-600 hover:border-slate-400"
+              }`}
             >
-              접기
+              지식 지도
+            </button>
+            <button
+              type="button"
+              onClick={() => setMapMode("metacognition")}
+              className={`rounded-full border px-4 py-1.5 text-sm ${
+                selectedMapMode === "metacognition"
+                  ? "border-slate-900 bg-slate-900 text-white"
+                  : "border-slate-300 bg-white text-slate-600 hover:border-slate-400"
+              }`}
+            >
+              메타인지 지도
             </button>
           </div>
-          <WeekExpandedMap
-            concepts={conceptsByWeek[selectedWeek.id] ?? []}
-            snapshot={activeSnapshot}
-            mode={selectedMapMode}
-          />
-          <WeekDetailPanel week={selectedWeek} />
+          <MapLegend mode={selectedMapMode} />
         </div>
-      )}
+
+        <MapSnapshotSlider snapshots={subjectSnapshots} index={clampedIndex} onChange={setSnapshotIndex} />
+      </div>
     </div>
   );
 }

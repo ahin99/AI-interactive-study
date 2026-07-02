@@ -236,6 +236,6 @@ export const useDemoStore = create<DemoState>()(
         });
       },
     }),
-    { name: "lexirecall-demo-store" }
+    { name: "lexirecall-demo-store-v2" }
   )
 );

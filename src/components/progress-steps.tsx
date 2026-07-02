@@ -26,7 +26,7 @@ export function Breadcrumbs() {
       const week = getWeekById(segments[3]);
       crumbs.push({
         label: week?.title ?? segments[3],
-        href: `/subjects/${segments[1]}/weeks/${segments[3]}/recall`,
+        href: `/subjects/${segments[1]}/weeks/${segments[3]}`,
       });
       if (segments[4] === "recall") crumbs.push({ label: "백지복습", href: pathname });
       if (segments[4] === "feedback") crumbs.push({ label: "피드백", href: pathname });

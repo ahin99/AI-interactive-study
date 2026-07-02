@@ -3,7 +3,6 @@
 import { use } from "react";
 import Link from "next/link";
 import { getSubjectById } from "@/lib/mock-data";
-import { MetricCard } from "@/components/metric-card";
 import { SubjectMapView } from "@/components/subject-map-view";
 
 export default function SubjectDetailPage({
@@ -26,20 +25,20 @@ export default function SubjectDetailPage({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">{subject.name}</h1>
-        <p className="mt-1 text-sm text-slate-500">주차 타일을 눌러 개념 지도를 확대하세요.</p>
-      </div>
-
-      <div className="grid gap-3 sm:grid-cols-3">
-        <MetricCard label="지도 완성률" value={`${subject.completionRate}%`} accent="text-teal-700" />
-        <MetricCard
-          label="메타인지 오차율"
-          value={`${subject.metacognitionGapRate}%`}
-          accent="text-pink-600"
-        />
-        <MetricCard label="업로드 자료" value={`${subject.materialCount}개`} accent="text-slate-700" />
+        <h1 className="text-4xl font-bold tracking-normal text-slate-950 sm:text-6xl">{subject.name}</h1>
+        <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 border-y border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
+          <span>
+            지도 완성률 <strong className="ml-1 text-slate-950">{subject.completionRate}%</strong>
+          </span>
+          <span>
+            메타인지 오차율 <strong className="ml-1 text-pink-600">{subject.metacognitionGapRate}%</strong>
+          </span>
+          <span>
+            업로드 자료 <strong className="ml-1 text-slate-950">{subject.materialCount}개</strong>
+          </span>
+        </div>
       </div>
 
       <SubjectMapView subject={subject} />

@@ -7,6 +7,7 @@ import { MapPinned } from "lucide-react";
 import { useDemoStore } from "@/lib/demo-store";
 import { getWeekById } from "@/lib/mock-data";
 import { AnnotatedAnswer } from "@/components/annotated-answer";
+import { RecallFlowSteps } from "@/components/recall-flow-steps";
 import { VerificationQuestionList } from "@/components/verification-question-list";
 
 export default function WeekFeedbackPage({
@@ -44,16 +45,11 @@ export default function WeekFeedbackPage({
   function handleSave() {
     saveRecallRecord();
     resetCurrentRecall();
-    router.push(`/subjects/${subjectId}`);
-  }
-
-  function reviewAgain() {
-    resetCurrentRecall();
-    router.push(`/subjects/${subjectId}/weeks/${weekId}/recall`);
+    router.push(`/subjects/${subjectId}/weeks/${weekId}`);
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="space-y-6">
       <div>
         <p className="text-xs font-medium text-teal-700">{week.title}</p>
         <h1 className="text-xl font-semibold text-slate-900">첨삭형 피드백</h1>
@@ -62,51 +58,53 @@ export default function WeekFeedbackPage({
         </p>
       </div>
 
-      <div>
-        <p className="mb-1 text-xs font-medium text-slate-500">내 답안</p>
-        <AnnotatedAnswer blocks={currentWeekFeedback.answerBlocks} />
-      </div>
+      <RecallFlowSteps current={3} />
 
-      {currentWeekFeedback.missingHints.length > 0 && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-          <p className="mb-2 text-sm font-semibold text-red-800">누락된 내용 단서</p>
-          <ul className="list-disc space-y-1 pl-5 text-sm text-red-700">
-            {currentWeekFeedback.missingHints.map((hint, i) => (
-              <li key={i}>{hint}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_390px]">
+        <section className="space-y-5">
+          <div>
+            <p className="mb-2 text-sm font-semibold text-slate-800">내 답안</p>
+            <AnnotatedAnswer blocks={currentWeekFeedback.answerBlocks} />
+          </div>
 
-      <div>
-        <p className="mb-2 text-sm font-semibold text-slate-800">소크라테스식 이해 검증 질문</p>
-        <VerificationQuestionList questions={currentWeekFeedback.verificationQuestions} />
-      </div>
+          {currentWeekFeedback.missingHints.length > 0 && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+              <p className="mb-2 text-sm font-semibold text-red-800">누락된 내용 단서</p>
+              <ul className="list-disc space-y-1 pl-5 text-sm text-red-700">
+                {currentWeekFeedback.missingHints.map((hint, i) => (
+                  <li key={i}>{hint}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-      <div className="flex items-start gap-2 rounded-lg border border-teal-200 bg-teal-50 p-4 text-sm text-teal-800">
-        <MapPinned className="mt-0.5 h-4 w-4 shrink-0" />
-        {currentWeekFeedback.nextReviewHint}
-      </div>
+          <div className="flex items-start gap-2 rounded-lg border border-teal-200 bg-teal-50 p-4 text-sm text-teal-800">
+            <MapPinned className="mt-0.5 h-4 w-4 shrink-0" />
+            <div>
+              <p className="font-semibold">복습 제안</p>
+              <p className="mt-1">{currentWeekFeedback.nextReviewHint}</p>
+            </div>
+          </div>
+        </section>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          disabled={!allAnswered}
-          onClick={handleSave}
-          className="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-        >
-          결과 저장
-        </button>
-        <button
-          type="button"
-          onClick={reviewAgain}
-          className="rounded-full border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 hover:border-slate-400"
-        >
-          다시 복습
-        </button>
-        {!allAnswered && (
-          <span className="text-xs text-slate-400">질문 3개에 모두 답변하면 저장할 수 있습니다.</span>
-        )}
+        <aside className="space-y-4 rounded-lg border border-slate-200 bg-white p-4">
+          <div>
+            <p className="mb-2 text-sm font-semibold text-slate-800">소크라테스식 이해 검증 질문</p>
+            <VerificationQuestionList questions={currentWeekFeedback.verificationQuestions} />
+          </div>
+
+          <button
+            type="button"
+            disabled={!allAnswered}
+            onClick={handleSave}
+            className="w-full rounded-lg bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+          >
+            결과 저장
+          </button>
+          {!allAnswered && (
+            <p className="text-xs text-slate-400">질문 3개에 모두 답변하면 저장할 수 있습니다.</p>
+          )}
+        </aside>
       </div>
     </div>
   );
