@@ -210,8 +210,8 @@ export const mockSubjects: Subject[] = [
     completionRate: 62,
     metacognitionGapRate: 92,
     lastReviewedAt: "7일 전",
-    lastReviewHint: "의사표시 관련 자료를 다시 찾아 백지복습 하세요.",
-    materialCount: 3,
+    lastReviewHint: "법률행위와 의사표시 단원을 이어서 백지복습 하세요.",
+    materialCount: 16,
     recent: true,
   },
   {
@@ -266,23 +266,63 @@ export const mockSubjects: Subject[] = [
   },
 ];
 
+const civilLawGeneralSyllabus: {
+  id: string;
+  weekNumber: number;
+  topic: string;
+  keywords: string[];
+}[] = [
+  { id: "week-1", weekNumber: 1, topic: "민법의 기초", keywords: ["사법", "공법", "민법의 법원", "성문법", "관습법", "조리", "신의성실", "권리남용", "강행규정", "임의규정", "일반조항", "법률관계", "사적자치", "거래안전", "공서양속", "민법의 체계"] },
+  { id: "week-2", weekNumber: 2, topic: "권리와 의무", keywords: ["권리", "의무", "권능", "권한", "청구권", "형성권", "항변권", "지배권", "사권의 분류", "권리행사", "권리보전", "권리충돌", "법률관계", "급부", "책임", "권리변동"] },
+  { id: "week-3", weekNumber: 3, topic: "자연인", keywords: ["권리능력", "권리능력의 시기", "권리능력의 종기", "태아", "의사능력", "행위능력", "제한능력자", "미성년자", "피성년후견인", "피한정후견인", "동의", "취소", "주소", "부재", "실종선고", "동시사망"] },
+  { id: "week-4", weekNumber: 4, topic: "의사표시와 착오", keywords: ["의사표시", "효과의사", "표시행위", "진의", "비진의표시", "통정허위표시", "착오", "중요부분", "중대한 과실", "사기", "강박", "도달주의", "수령능력", "해석", "하자", "제3자 보호"] },
+  { id: "week-5", weekNumber: 5, topic: "무효와 취소", keywords: ["무효", "취소", "절대적 무효", "상대적 무효", "일부무효", "유동적 무효", "추인", "무효행위 전환", "취소권자", "취소의 효과", "법정추인", "제척기간", "소급효", "선의의 제3자", "부당이득", "효력확정"] },
+  { id: "week-6", weekNumber: 6, topic: "법인", keywords: ["법인격", "사단법인", "재단법인", "정관", "설립등기", "기관", "이사", "감사", "사원총회", "대표", "목적범위", "불법행위능력", "비법인사단", "총유", "해산", "청산"] },
+  { id: "week-7", weekNumber: 7, topic: "권리의 객체", keywords: ["물건", "유체물", "관리 가능한 자연력", "부동산", "동산", "주물", "종물", "원물", "과실", "천연과실", "법정과실", "분리", "독립성", "일물일권주의", "물건의 일부", "권리의 객체"] },
+  { id: "week-8", weekNumber: 8, topic: "법률행위", keywords: ["법률행위", "의사표시", "계약", "단독행위", "합동행위", "요건", "목적", "확정성", "가능성", "적법성", "사회적 타당성", "공서양속", "불공정행위", "동기", "해석", "효력"] },
+  { id: "week-9", weekNumber: 9, topic: "대리", keywords: ["대리권", "본인", "대리인", "상대방", "현명주의", "대리행위", "수권행위", "대리권 남용", "복대리", "무권대리", "표현대리", "추인", "철회", "상대방 보호", "자기계약", "쌍방대리"] },
+  { id: "week-10", weekNumber: 10, topic: "조건과 기한", keywords: ["조건", "기한", "정지조건", "해제조건", "시기", "종기", "불능조건", "불법조건", "기성조건", "조건성취", "조건불성취", "기한의 이익", "기한이익 상실", "소급효", "장래효", "부관"] },
+  { id: "week-11", weekNumber: 11, topic: "기간", keywords: ["기간", "기간계산", "초일불산입", "초일산입", "역법", "만료점", "기간말일", "공휴일", "연령계산", "시효기간", "제척기간", "기산점", "기간연장", "기간단축", "도달", "효력발생"] },
+  { id: "week-12", weekNumber: 12, topic: "소멸시효 기초", keywords: ["소멸시효", "취득시효", "시효기간", "기산점", "권리행사 가능성", "채권", "소유권", "형성권", "원용", "시효이익", "포기", "소급효", "제척기간", "시효완성", "소멸효", "권리불행사"] },
+  { id: "week-13", weekNumber: 13, topic: "소멸시효 중단과 정지", keywords: ["시효중단", "청구", "재판상 청구", "압류", "가압류", "가처분", "승인", "최고", "중단효", "재진행", "시효정지", "장애사유", "완성유예", "당사자", "보증인", "시효관리"] },
+  { id: "week-14", weekNumber: 14, topic: "권리행사와 항변", keywords: ["항변권", "동시이행", "상계", "유치", "권리보전", "기한항변", "소멸시효 항변", "신의칙 항변", "권리남용 항변", "급부거절", "방어방법", "행사요건", "효과", "상대방", "이익형량", "사례검토"] },
+  { id: "week-15", weekNumber: 15, topic: "민법총칙 사례정리", keywords: ["사례분석", "요건검토", "효과정리", "쟁점추출", "개념비교", "권리주체", "법률행위", "의사표시", "대리", "무효", "취소", "조건", "기한", "시효", "항변", "답안구성"] },
+  { id: "week-16", weekNumber: 16, topic: "기말 종합정리", keywords: ["총칙체계", "민법원리", "권리주체", "권리객체", "법률행위", "의사표시", "하자", "무효", "취소", "대리", "조건", "기한", "기간", "소멸시효", "사례형", "종합정리"] },
+];
+
+const civilLawGeneralWeeks: StudyWeek[] = civilLawGeneralSyllabus.map((week) => ({
+  id: week.id,
+  subjectId: "civil-law-general",
+  weekNumber: week.weekNumber,
+  title: `${week.weekNumber}주차 · ${week.topic}`,
+  materialIds: [`mat-week${week.weekNumber}-1`],
+  reviewCount: 5,
+}));
+
+const civilLawGeneralMaterials: WeekMaterial[] = civilLawGeneralSyllabus.map((week) => ({
+  id: `mat-week${week.weekNumber}-1`,
+  subjectId: "civil-law-general",
+  weekId: week.id,
+  displayName: `민법총칙 ${week.weekNumber}주차 핵심 키워드`,
+  fileName: `민법총칙_${String(week.weekNumber).padStart(2, "0")}주차_키워드.txt`,
+  uploadedAt: "2026-07-03",
+  status: "analyzed",
+}));
+
+const civilLawGeneralKeywordConcepts: WeekConcept[] = civilLawGeneralSyllabus
+  .flatMap((week) =>
+    week.keywords.map((keyword, index) => ({
+      id: `${week.id}-concept-${index + 1}`,
+      weekId: week.id,
+      title: keyword,
+      type: index === 0 ? "main_concept" : index % 5 === 1 ? "requirement" : index % 5 === 2 ? "effect" : index % 5 === 3 ? "exception" : "comparison",
+      outlineLabel: week.topic,
+      keyword,
+    }))
+  );
+
 export const mockWeeks: StudyWeek[] = [
-  {
-    id: "week-4",
-    subjectId: "civil-law-general",
-    weekNumber: 4,
-    title: "4주차 · 의사표시와 착오",
-    materialIds: ["mat-week4-1", "mat-week4-2"],
-    reviewCount: 2,
-  },
-  {
-    id: "week-5",
-    subjectId: "civil-law-general",
-    weekNumber: 5,
-    title: "5주차 · 무효와 취소",
-    materialIds: ["mat-week5-1"],
-    reviewCount: 0,
-  },
+  ...civilLawGeneralWeeks,
   {
     id: "const-week-1",
     subjectId: "constitutional-law",
@@ -382,33 +422,7 @@ export const mockWeeks: StudyWeek[] = [
 ];
 
 export const mockWeekMaterials: WeekMaterial[] = [
-  {
-    id: "mat-week4-1",
-    subjectId: "civil-law-general",
-    weekId: "week-4",
-    displayName: "민법총칙 4주차 강의자료",
-    fileName: "민법총칙 4주차261, 나반_260630_192818.pdf",
-    uploadedAt: "2026-06-20",
-    status: "analyzed",
-  },
-  {
-    id: "mat-week4-2",
-    subjectId: "civil-law-general",
-    weekId: "week-4",
-    displayName: "의사표시 판례 정리",
-    fileName: "의사표시_판례정리.pdf",
-    uploadedAt: "2026-06-21",
-    status: "analyzed",
-  },
-  {
-    id: "mat-week5-1",
-    subjectId: "civil-law-general",
-    weekId: "week-5",
-    displayName: "민법총칙 5주차 강의자료",
-    fileName: "민법총칙 5주차261, 나반_260630_192809.pdf",
-    uploadedAt: "2026-06-30",
-    status: "analyzed",
-  },
+  ...civilLawGeneralMaterials,
   { id: "mat-const-1", subjectId: "constitutional-law", weekId: "const-week-1", displayName: "헌법 1주차 강의자료", fileName: "헌법_1주차.pdf", uploadedAt: "2026-06-18", status: "analyzed" },
   { id: "mat-const-2", subjectId: "constitutional-law", weekId: "const-week-2", displayName: "기본권 제한 판례", fileName: "기본권제한_판례.pdf", uploadedAt: "2026-06-19", status: "analyzed" },
   { id: "mat-const-3", subjectId: "constitutional-law", weekId: "const-week-3", displayName: "평등권 사례 정리", fileName: "평등권_사례.pdf", uploadedAt: "2026-06-22", status: "analyzed" },
@@ -439,6 +453,7 @@ export const mockWeekConcepts: WeekConcept[] = [
   { id: "ratification", weekId: "week-5", title: "추인", type: "requirement" },
   { id: "legal-act-effect", weekId: "week-5", title: "법률행위 효력", type: "effect" },
   { id: "limitation-period", weekId: "week-5", title: "제척기간", type: "exception" },
+  ...civilLawGeneralKeywordConcepts,
   ...makeWeekConcepts("const-week-1", ["헌법의 최고규범성", "국민주권", "법치국가원리", "사회국가원리", "권력분립"]),
   ...makeWeekConcepts("const-week-2", ["기본권 주체", "기본권 제한", "과잉금지원칙", "본질내용 침해금지", "이중기준론"]),
   ...makeWeekConcepts("const-week-3", ["평등권", "자의금지원칙", "비례심사", "적극적 평등실현조치", "차별취급"]),
@@ -490,8 +505,22 @@ export function getWeekById(weekId: string): StudyWeek | undefined {
 
 // 난이도 "핵심 키워드 3개"에서 보여줄 주차별 고정 키워드
 export const mockWeekKeywords: Record<string, [string, string, string]> = {
+  "week-1": ["사법", "신의성실", "권리남용"],
+  "week-2": ["권리", "의무", "법률관계"],
+  "week-3": ["권리능력", "행위능력", "제한능력자"],
   "week-4": ["통정허위표시", "비진의표시", "착오"],
   "week-5": ["무효", "취소", "추인"],
+  "week-6": ["법인격", "정관", "대표"],
+  "week-7": ["물건", "부동산", "종물"],
+  "week-8": ["법률행위", "의사표시", "계약"],
+  "week-9": ["대리권", "무권대리", "표현대리"],
+  "week-10": ["조건", "기한", "기한의 이익"],
+  "week-11": ["기간계산", "초일불산입", "기간만료"],
+  "week-12": ["소멸시효", "기산점", "시효이익"],
+  "week-13": ["청구", "승인", "시효정지"],
+  "week-14": ["항변권", "상계", "권리보전"],
+  "week-15": ["사례분석", "쟁점추출", "개념비교"],
+  "week-16": ["총칙체계", "법률행위", "시효"],
   "const-week-1": ["국민주권", "법치국가", "권력분립"],
   "const-week-2": ["기본권 제한", "과잉금지", "본질내용"],
   "criminal-week-1": ["구성요건", "위법성", "책임"],
@@ -508,6 +537,11 @@ export const defaultWeekSelfAssessments: Record<string, SelfAssessment[]> = {
     { conceptId: "declaration-of-intent", predictedKnown: true },
   ],
   "week-5": [],
+  "week-7": [
+    { conceptId: "week-7-concept-1", predictedKnown: true },
+    { conceptId: "week-7-concept-4", predictedKnown: true },
+    { conceptId: "week-7-concept-6", predictedKnown: true },
+  ],
   "const-week-1": [{ conceptId: "const-week-1-concept-2", predictedKnown: true }],
   "const-week-2": [{ conceptId: "const-week-2-concept-3", predictedKnown: true }],
   "criminal-week-1": [{ conceptId: "criminal-week-1-concept-1", predictedKnown: true }],
@@ -519,14 +553,6 @@ export const defaultWeekSelfAssessments: Record<string, SelfAssessment[]> = {
 function tile(status: KnowledgeStatus, metacognitionGap: number | null) {
   return { status, metacognitionGap };
 }
-
-const week5UnreviewedTiles: MapSnapshot["tilesByConceptId"] = {
-  nullity: { conceptId: "nullity", ...tile("unreviewed", null) },
-  rescission: { conceptId: "rescission", ...tile("unreviewed", null) },
-  ratification: { conceptId: "ratification", ...tile("unreviewed", null) },
-  "legal-act-effect": { conceptId: "legal-act-effect", ...tile("unreviewed", null) },
-  "limitation-period": { conceptId: "limitation-period", ...tile("unreviewed", null) },
-};
 
 const demoStatusCycle: KnowledgeStatus[] = [
   "complete",
@@ -552,64 +578,50 @@ function buildSubjectTiles(subjectId: string, offset = 0): MapSnapshot["tilesByC
   );
 }
 
+function buildCivilLawDemoTiles(reviewNumber: number): MapSnapshot["tilesByConceptId"] {
+  const weekIds = civilLawGeneralSyllabus.map((week) => week.id);
+  const conceptIds = mockWeekConcepts
+    .filter((concept) => weekIds.includes(concept.weekId))
+    .map((concept) => concept.id);
+  const statusByReview: KnowledgeStatus[][] = [
+    ["unreviewed", "not_recalled", "not_recalled", "misconception", "unreviewed", "partial", "not_recalled", "misconception"],
+    ["not_recalled", "misconception", "partial", "unreviewed", "partial", "not_recalled", "misconception", "partial"],
+    ["misconception", "partial", "partial", "complete", "not_recalled", "partial", "misconception", "complete"],
+    ["partial", "complete", "partial", "misconception", "complete", "partial", "complete", "not_recalled"],
+    ["complete", "partial", "complete", "partial", "complete", "misconception", "complete", "partial"],
+  ];
+  const metacognitionBaseByReview = [88, 72, 56, 42, 28];
+  const statuses = statusByReview[reviewNumber - 1] ?? statusByReview[4];
+  const baseGap = metacognitionBaseByReview[reviewNumber - 1] ?? 28;
+
+  return Object.fromEntries(
+    conceptIds.map((conceptId, index) => {
+      const weekNumber = Math.floor(index / 16) + 1;
+      const position = index % 16;
+      const row = Math.floor(position / 4);
+      const col = position % 4;
+      const mosaicIndex = (position * 7 + row * 3 + col * 5 + weekNumber * 11 + reviewNumber * 13) % statuses.length;
+      const status = statuses[mosaicIndex];
+      const metacognitionGap = status === "unreviewed" ? null : Math.max(12, Math.min(96, baseGap + ((index * 7) % 24) - 8));
+      return [conceptId, { conceptId, status, metacognitionGap }];
+    })
+  );
+}
+
+const civilLawDemoSnapshots: MapSnapshot[] = Array.from({ length: 5 }, (_, index) => {
+  const reviewNumber = index + 1;
+  return {
+    id: reviewNumber === 5 ? "snapshot-civil-law-current" : `snapshot-civil-law-${reviewNumber}`,
+    subjectId: "civil-law-general",
+    label: reviewNumber === 5 ? "현재(5회차)" : `${reviewNumber}회차`,
+    reviewNumber,
+    createdAt: `2026-06-${String(18 + index * 3).padStart(2, "0")}`,
+    tilesByConceptId: buildCivilLawDemoTiles(reviewNumber),
+  };
+});
+
 export const mockKnowledgeSnapshots: MapSnapshot[] = [
-  {
-    id: "snapshot-1",
-    subjectId: "civil-law-general",
-    label: "1회차",
-    reviewNumber: 1,
-    createdAt: "2026-06-22",
-    tilesByConceptId: {
-      "declaration-of-intent": { conceptId: "declaration-of-intent", ...tile("partial", 40) },
-      "false-representation": { conceptId: "false-representation", ...tile("partial", 65) },
-      "article-108": { conceptId: "article-108", ...tile("partial", 55) },
-      collusion: { conceptId: "collusion", ...tile("not_recalled", 80) },
-      "intent-mismatch": { conceptId: "intent-mismatch", ...tile("partial", 50) },
-      "nullity-between-parties": { conceptId: "nullity-between-parties", ...tile("misconception", 90) },
-      "good-faith-third-party": { conceptId: "good-faith-third-party", ...tile("not_recalled", 75) },
-      "untrue-intention": { conceptId: "untrue-intention", ...tile("misconception", 85) },
-      mistake: { conceptId: "mistake", ...tile("unreviewed", null) },
-      ...week5UnreviewedTiles,
-    },
-  },
-  {
-    id: "snapshot-2",
-    subjectId: "civil-law-general",
-    label: "2회차",
-    reviewNumber: 2,
-    createdAt: "2026-06-25",
-    tilesByConceptId: {
-      "declaration-of-intent": { conceptId: "declaration-of-intent", ...tile("complete", 20) },
-      "false-representation": { conceptId: "false-representation", ...tile("partial", 65) },
-      "article-108": { conceptId: "article-108", ...tile("partial", 55) },
-      collusion: { conceptId: "collusion", ...tile("partial", 60) },
-      "intent-mismatch": { conceptId: "intent-mismatch", ...tile("complete", 25) },
-      "nullity-between-parties": { conceptId: "nullity-between-parties", ...tile("misconception", 90) },
-      "good-faith-third-party": { conceptId: "good-faith-third-party", ...tile("not_recalled", 85) },
-      "untrue-intention": { conceptId: "untrue-intention", ...tile("misconception", 78) },
-      mistake: { conceptId: "mistake", ...tile("partial", 45) },
-      ...week5UnreviewedTiles,
-    },
-  },
-  {
-    id: "snapshot-current",
-    subjectId: "civil-law-general",
-    label: "현재",
-    reviewNumber: 2,
-    createdAt: "2026-06-25",
-    tilesByConceptId: {
-      "declaration-of-intent": { conceptId: "declaration-of-intent", ...tile("complete", 20) },
-      "false-representation": { conceptId: "false-representation", ...tile("partial", 65) },
-      "article-108": { conceptId: "article-108", ...tile("partial", 55) },
-      collusion: { conceptId: "collusion", ...tile("partial", 60) },
-      "intent-mismatch": { conceptId: "intent-mismatch", ...tile("complete", 25) },
-      "nullity-between-parties": { conceptId: "nullity-between-parties", ...tile("misconception", 90) },
-      "good-faith-third-party": { conceptId: "good-faith-third-party", ...tile("not_recalled", 85) },
-      "untrue-intention": { conceptId: "untrue-intention", ...tile("misconception", 78) },
-      mistake: { conceptId: "mistake", ...tile("partial", 45) },
-      ...week5UnreviewedTiles,
-    },
-  },
+  ...civilLawDemoSnapshots,
   {
     id: "snapshot-constitutional-law-current",
     subjectId: "constitutional-law",
@@ -657,9 +669,92 @@ export const mockWeekSampleAnswer: Record<string, string> = {
     "통정허위표시는 상대방과 짜고 진의와 다른 의사표시를 하는 경우이며, 당사자 사이에서는 무효이다.\n제3자에게도 언제나 무효라고 볼 수 있다.\n비진의표시는 통정허위표시와 비슷하지만 상대방이 알았는지 여부가 중요한 차이다.\n착오는 표의자가 스스로 착각해서 표시와 진의가 어긋난 경우로, 통정허위표시와는 성립 요건이 다르다.",
   "week-5":
     "무효는 처음부터 효력이 없는 것이고 취소는 취소권을 행사해야 효력이 없어지는 것이다.\n추인을 하면 무효인 법률행위도 유효하게 된다.",
+  "week-7":
+    "권리의 객체는 권리의 내용이 향하는 대상으로, 민법총칙에서는 특히 물건 개념을 중심으로 정리할 수 있다. 물건은 유체물뿐 아니라 관리할 수 있는 자연력도 포함하고, 거래와 권리관계에서는 독립한 물건인지가 중요하다. 부동산은 토지와 그 정착물이고, 동산은 그 밖의 물건으로 구분된다. 주물과 종물은 경제적 이용관계에 따라 함께 다루어질 수 있고, 원물과 과실은 수익이 어디에서 나오는지에 따라 나뉜다. 천연과실과 법정과실은 발생 방식이 다르며, 과실은 분리 시점과 귀속 문제를 함께 보아야 한다. 결국 7주차는 물건의 종류, 독립성, 종물 관계, 과실 개념을 구별하는 것이 핵심이다.",
 };
 
+const week7HistoryAnswers = [
+  "권리의 객체는 권리가 미치는 대상이고 물건이 대표적이다. 부동산과 동산을 구분하고, 주물과 종물은 같이 쓰이는 물건 정도로 이해했다.",
+  "물건은 유체물만 의미하는 것이 아니라 관리 가능한 자연력도 포함한다. 부동산은 토지와 정착물이고 동산은 그 외의 물건이다.",
+  "주물과 종물은 경제적 관계가 있고, 원물과 과실은 수익 발생 관계로 구분된다. 다만 과실의 종류와 귀속 시점은 아직 헷갈린다.",
+  "권리의 객체 단원에서는 물건의 독립성, 부동산과 동산, 주물과 종물, 원물과 과실을 구별해야 한다. 특히 종물은 주물의 처분을 따르는지가 문제된다.",
+  "물건은 권리의 객체가 되는 기본 단위이고, 독립성이 중요하다. 부동산과 동산, 주물과 종물, 원물과 천연과실·법정과실을 구별해 사례에 적용해야 한다.",
+];
+
+const week7HistoryFeedback: Record<string, WeekFeedbackResult> = Object.fromEntries(
+  week7HistoryAnswers.map((answer, index) => {
+    const round = index + 1;
+    const recordId = `record-week7-${round}`;
+    return [
+      `feedback-week7-${round}`,
+      {
+        id: `feedback-week7-${round}`,
+        recallRecordId: recordId,
+        weekId: "week-7",
+        answerBlocks: [
+          {
+            id: `block-week7-${round}`,
+            text: answer,
+            highlights: [
+              {
+                phrase: answer.split(".")[0] || answer,
+                status: round <= 2 ? "partial" : "complete",
+                hint: round <= 3 ? "물건의 독립성과 과실의 구별을 더 분리해보세요." : undefined,
+              },
+            ],
+          },
+        ],
+        missingHints:
+          round <= 2
+            ? ["관리 가능한 자연력의 위치를 다시 확인", "원물과 과실의 구별 기준 보완"]
+            : round <= 4
+              ? ["과실 귀속 시점과 분리 개념 보완"]
+              : ["사례에서 주물·종물과 과실을 함께 묻는 경우 대비"],
+        verificationQuestions: [
+          { id: "q1", type: "comparison", question: "부동산과 동산은 어떤 기준으로 나누나요?", targetConceptTitles: ["부동산", "동산"] },
+          { id: "q2", type: "boundary", question: "종물이 주물과 함께 다루어지는 경계는 어디인가요?", targetConceptTitles: ["주물", "종물"] },
+          { id: "q3", type: "reason", question: "천연과실과 법정과실을 구별해야 하는 이유는 무엇인가요?", targetConceptTitles: ["천연과실", "법정과실"] },
+        ],
+        nextReviewHint:
+          round <= 2
+            ? "물건의 정의와 부동산·동산 구별부터 다시 백지복습하세요."
+            : round <= 4
+              ? "주물·종물, 원물·과실을 서로 비교해 다시 설명하세요."
+              : "사례에서 물건의 독립성과 과실 귀속을 함께 점검하세요.",
+        statusByConceptId: {
+          "week-7-concept-1": round >= 3 ? "complete" : "partial",
+          "week-7-concept-4": round >= 4 ? "complete" : "partial",
+          "week-7-concept-6": round >= 5 ? "complete" : "misconception",
+          "week-7-concept-9": round >= 4 ? "partial" : "not_recalled",
+          "week-7-concept-10": round >= 5 ? "partial" : "not_recalled",
+          "week-7-concept-11": round >= 5 ? "partial" : "not_recalled",
+        },
+      } satisfies WeekFeedbackResult,
+    ];
+  })
+);
+
+const week7HistoryRecords: RecallRecord[] = week7HistoryAnswers.map((answer, index) => {
+  const round = index + 1;
+  return {
+    id: `record-week7-${round}`,
+    subjectId: "civil-law-general",
+    weekId: "week-7",
+    difficulty: round % 3 === 1 ? "outline" : round % 3 === 2 ? "keywords" : "blank",
+    selfAssessments: defaultWeekSelfAssessments["week-7"],
+    answerText: answer,
+    verificationAnswers: {
+      q1: "부동산은 토지와 정착물이고 동산은 그 외의 물건입니다.",
+      q2: "주물의 경제적 이용을 돕는 관계인지가 중요합니다.",
+      q3: "수익의 발생 방식과 귀속을 구별하기 위해서입니다.",
+    },
+    feedbackId: `feedback-week7-${round}`,
+    submittedAt: `2026-06-${String(14 + round * 3).padStart(2, "0")}`,
+  };
+});
+
 export const mockWeekFeedbackById: Record<string, WeekFeedbackResult> = {
+  ...week7HistoryFeedback,
   "feedback-week4-1": {
     id: "feedback-week4-1",
     recallRecordId: "record-week4-1",
@@ -767,6 +862,7 @@ export const mockWeekFeedbackById: Record<string, WeekFeedbackResult> = {
 };
 
 export const mockRecallRecords: RecallRecord[] = [
+  ...week7HistoryRecords,
   {
     id: "record-week4-1",
     subjectId: "civil-law-general",

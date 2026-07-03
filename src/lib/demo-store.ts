@@ -299,6 +299,6 @@ export const useDemoStore = create<DemoState>()(
         return converted.week.id;
       },
     }),
-    { name: "lexirecall-demo-store-v2" }
+    { name: "lexirecall-demo-store-v6" }
   )
 );

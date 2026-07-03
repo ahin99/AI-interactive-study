@@ -7,7 +7,8 @@ import { useDemoStore } from "@/lib/demo-store";
 import { getWeekById, mockWeekMaterials } from "@/lib/mock-data";
 import type { AiApiResponse, AnalyzeMaterialAIResult } from "@/lib/ai/schemas";
 
-type Status = "idle" | "analyzing" | "analyzed";
+type Status = "idle" | "uploading" | "analyzing" | "analyzed";
+type AnalyzeMaterialResponse = AiApiResponse<AnalyzeMaterialAIResult> & { warnings?: string[] };
 
 interface DraftFile {
   id: string;
@@ -17,16 +18,12 @@ interface DraftFile {
   mimeType?: string;
 }
 
-function readFileAsBase64(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = String(reader.result ?? "");
-      resolve(result.includes(",") ? result.split(",")[1] : result);
-    };
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
+const MAX_UPLOAD_FILE_SIZE = 25 * 1024 * 1024;
+const MAX_TOTAL_UPLOAD_SIZE = 50 * 1024 * 1024;
+
+function isSupportedFile(file: File) {
+  const name = file.name.toLowerCase();
+  return file.type === "application/pdf" || file.type.startsWith("text/") || name.endsWith(".pdf") || name.endsWith(".txt");
 }
 
 function UploadForm() {
@@ -46,7 +43,10 @@ function UploadForm() {
 
   function addFiles(fileList: FileList | null) {
     if (!fileList || fileList.length === 0) return;
-    const added = Array.from(fileList).map((f) => ({
+    const incoming = Array.from(fileList);
+    const accepted = incoming.filter(isSupportedFile);
+    const rejected = incoming.length - accepted.length;
+    const added = accepted.map((f) => ({
       id: `${f.name}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       fileName: f.name,
       displayName: f.name.replace(/\.[^.]+$/, ""),
@@ -55,6 +55,7 @@ function UploadForm() {
     }));
     setFiles((prev) => [...prev, ...added]);
     setStatus("idle");
+    setMessage(rejected > 0 ? "PDF 또는 TXT 파일만 업로드할 수 있습니다." : "");
   }
 
   function applySample(material: (typeof mockWeekMaterials)[number]) {
@@ -80,7 +81,7 @@ function UploadForm() {
 
   async function startAnalysis() {
     if (files.length === 0) return;
-    setStatus("analyzing");
+    setStatus("uploading");
     setMessage("");
     const week = Number(weekNumber);
     if (!Number.isInteger(week) || week < 1 || week > 16) {
@@ -90,45 +91,55 @@ function UploadForm() {
     }
 
     try {
-      const primary = files[0];
-      let fileBase64: string | undefined;
-      let plainText: string | undefined;
-      const mimeType = primary.mimeType ?? "text/plain";
-
-      if (primary.file && mimeType === "application/pdf") {
-        fileBase64 = await readFileAsBase64(primary.file);
-      } else if (primary.file && mimeType.startsWith("text/")) {
-        plainText = await primary.file.text();
-      } else {
-        plainText = files
-          .map((file) => `파일명: ${file.fileName}\n표시명: ${file.displayName}`)
-          .join("\n\n");
+      const realFiles = files.flatMap((file) => (file.file ? [file.file] : []));
+      const oversized = realFiles.find((file) => file.size > MAX_UPLOAD_FILE_SIZE);
+      if (oversized) {
+        throw new Error(`${oversized.name} 파일이 너무 큽니다. 25MB 이하 PDF를 사용하세요.`);
+      }
+      const totalSize = realFiles.reduce((sum, file) => sum + file.size, 0);
+      if (totalSize > MAX_TOTAL_UPLOAD_SIZE) {
+        throw new Error("전체 파일 크기가 너무 큽니다. 50MB 이하로 업로드하세요.");
       }
 
+      const formData = new FormData();
+      formData.append("subjectId", subjectId);
+      formData.append("subjectName", course);
+      formData.append("weekNumber", String(week));
+      for (const file of realFiles) {
+        formData.append("files", file);
+      }
+      if (realFiles.length === 0) {
+        formData.append(
+          "plainText",
+          files.map((file) => `파일명: ${file.fileName}\n표시명: ${file.displayName}`).join("\n\n")
+        );
+      }
+
+      setStatus("analyzing");
       const response = await fetch("/api/ai/analyze-material", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          subjectId,
-          subjectName: course,
-          weekNumber: week,
-          fileName: primary.fileName,
-          mimeType,
-          fileBase64,
-          plainText,
-        }),
+        body: formData,
       });
-      const payload = (await response.json()) as AiApiResponse<AnalyzeMaterialAIResult>;
+      const payload = (await response.json()) as AnalyzeMaterialResponse;
       if (!payload.ok) throw new Error(payload.message);
+      const representativeFileName = files.length === 1 ? files[0].fileName : `${files.length}개 자료 통합`;
+      const representativeMimeType = files.length === 1 ? files[0].mimeType ?? "text/plain" : "text/plain";
       const weekId = saveMaterialAnalysis({
         subjectId,
-        fileName: primary.fileName,
-        mimeType,
+        fileName: representativeFileName,
+        mimeType: representativeMimeType,
         analysis: payload.data,
       });
       setAnalyzedWeekId(weekId);
       setStatus("analyzed");
-      setMessage(payload.fallback ? payload.message ?? "임시 개념 구조로 저장했습니다." : "");
+      setMessage(
+        [
+          payload.fallback ? payload.message ?? "임시 개념 구조로 저장했습니다." : "",
+          ...(payload.warnings ?? []),
+        ]
+          .filter(Boolean)
+          .join(" ")
+      );
     } catch (error) {
       setStatus("idle");
       setMessage(error instanceof Error ? error.message : "자료 분석에 실패했습니다.");
@@ -140,7 +151,7 @@ function UploadForm() {
       <div>
         <h1 className="text-xl font-semibold text-slate-900">자료 업로드</h1>
         <p className="mt-1 text-sm text-slate-500">
-          한 주차에 여러 파일을 업로드할 수 있습니다. 업로드한 파일은 하나의 주차 개념 지도로
+          한 주차에 여러 PDF 또는 TXT 파일을 업로드할 수 있습니다. 업로드한 파일은 하나의 주차 개념 지도로
           통합됩니다.
         </p>
       </div>
@@ -171,11 +182,12 @@ function UploadForm() {
       >
         <FileUp className="h-8 w-8 text-slate-400" />
         <p className="text-sm text-slate-600">
-          파일을 드래그하거나 클릭해서 선택하세요 (PDF, PPT) · 여러 개 선택 가능
+          파일을 드래그하거나 클릭해서 선택하세요 (PDF, TXT) · 여러 개 선택 가능
         </p>
         <input
           id="file-input"
           type="file"
+          accept=".pdf,.txt,application/pdf,text/plain"
           multiple
           className="hidden"
           onChange={(e) => addFiles(e.target.files)}
@@ -227,17 +239,22 @@ function UploadForm() {
       <div className="flex items-center gap-4">
         <button
           type="button"
-          disabled={files.length === 0 || status === "analyzing"}
+          disabled={files.length === 0 || status === "uploading" || status === "analyzing"}
           onClick={startAnalysis}
           className="flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
         >
-          {status === "analyzing" && <Loader2 className="h-4 w-4 animate-spin" />}
+          {(status === "uploading" || status === "analyzing") && <Loader2 className="h-4 w-4 animate-spin" />}
           분석 시작
         </button>
 
+        {status === "uploading" && (
+          <span className="text-sm text-slate-500">
+            자료를 서버로 업로드하는 중...
+          </span>
+        )}
         {status === "analyzing" && (
           <span className="text-sm text-slate-500">
-            AI가 {weekNumber}주차 개념 구조를 통합 추출하는 중...
+            PDF 텍스트를 추출하고 AI가 {weekNumber}주차 개념 구조를 생성하는 중...
           </span>
         )}
         {status === "analyzed" && (

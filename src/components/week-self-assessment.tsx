@@ -21,7 +21,8 @@ export function WeekSelfAssessment({
   weekId: string;
   concepts: WeekConcept[];
 }) {
-  const assessments = useDemoStore((s) => s.weekSelfAssessments[weekId] ?? []);
+  const weekSelfAssessments = useDemoStore((s) => s.weekSelfAssessments);
+  const assessments = weekSelfAssessments[weekId] ?? [];
   const toggle = useDemoStore((s) => s.toggleWeekSelfAssessment);
   const grouped = groupOrder
     .map((type) => ({ type, concepts: concepts.filter((concept) => concept.type === type) }))
